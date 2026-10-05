@@ -4,15 +4,14 @@ import plist from 'plist';
 import fg from 'fast-glob';
 
 export async function read(projectDir) {
-  const candidates = [
-    path.join(projectDir, 'ios', 'Runner', 'Info.plist'),
-    ...(await fg.glob('ios/**/Info.plist', {
-      cwd: projectDir,
-      absolute: true,
-      ignore: ['**/Pods/**', '**/build/**'],
-    })),
-  ];
-  const plistPath = candidates[0];
+  const candidates = await fg.glob('ios/**/Info.plist', {
+    cwd: projectDir,
+    absolute: true,
+    ignore: ['**/Pods/**', '**/build/**'],
+  });
+  const preferredPath = path.resolve(projectDir, 'ios', 'Runner', 'Info.plist');
+  const plistPath = candidates.find(candidate => path.resolve(candidate) === preferredPath)
+    || candidates[0];
 
   try {
     if (!plistPath) {
